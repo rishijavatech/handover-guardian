@@ -1,7 +1,7 @@
 package com.koco.guardian.service;
 
 import com.koco.guardian.entity.UserAuth;
-import com.koco.guardian.enums.ResponseCode;
+import com.koco.guardian.enums.ApplicationCode;
 import com.koco.guardian.exception.KocopeException;
 import com.koco.guardian.feignclient.PatronClient;
 import com.koco.guardian.repository.UserAuthRepository;
@@ -38,7 +38,7 @@ public class UserAuthService {
         UserAuth existingUser = userAuthRepository.findByEmail(email).orElse(null);
         if (existingUser != null) {
             log.error("User already exists with email: {}", email);
-            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, ResponseCode.USER_ALREADY_REGISTERED_IN_SYSTEM);
+            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, ApplicationCode.USER_ALREADY_REGISTERED_IN_SYSTEM);
         }
         UserAuth userAuth = new UserAuth();
         userAuth.setEmail(email);

@@ -1,6 +1,6 @@
 package com.koco.guardian.exception;
 
-import com.koco.guardian.enums.ResponseCode;
+import com.koco.guardian.enums.ApplicationCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -13,10 +13,10 @@ public class KocopeException extends Exception {
 	private final String errorMessage;
     private final Integer code;
 
-    public KocopeException(HttpStatus httpStatus, ResponseCode responseCode) {
-        super(responseCode.getMessage());
+    public KocopeException(HttpStatus httpStatus, ApplicationCode applicationCode) {
+        super(applicationCode.getMessage());
         this.httpStatus = httpStatus;
-        this.errorMessage = responseCode.getMessage();
-        this.code = responseCode.getCode();
+        this.errorMessage = applicationCode.getMessage();
+        this.code = applicationCode.getCode();
     }
 }

@@ -1,7 +1,7 @@
 package com.koco.guardian.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.koco.guardian.enums.ResponseCode;
+import com.koco.guardian.enums.ApplicationCode;
 import com.koco.guardian.response.ApplicationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApplicationResponse<String>> handleKocopeException(HttpServletRequest req,
             KocopeException ex) {
         log.error(LOG_FORMAT, req.getMethod(), req.getRequestURL(), ex.getErrorMessage());
-        ApplicationResponse<String> response = new ApplicationResponse<>(ResponseCode.FAILURE.getCode(),
+        ApplicationResponse<String> response = new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(),
                 ex.getErrorMessage(), ex.getErrorMessage());
         return ResponseEntity.status(ex.getHttpStatus())
                              .body(response);
@@ -61,8 +61,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApplicationResponse<String>> handleException(HttpServletRequest req, Exception ex) {
         log.error(LOG_FORMAT, req.getMethod(), req.getRequestURL(), ex.getMessage());
         log.error(ERROR, ex);
-        ApplicationResponse<String> response = new ApplicationResponse<>(ResponseCode.FAILURE.getCode(),
-                ResponseCode.FAILURE.getMessage(), ex.getMessage());
+        ApplicationResponse<String> response = new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(),
+                ApplicationCode.FAILURE.getMessage(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                              .body(response);
     }

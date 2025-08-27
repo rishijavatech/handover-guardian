@@ -1,7 +1,7 @@
 package com.koco.guardian.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.koco.guardian.enums.ResponseCode;
+import com.koco.guardian.enums.ApplicationCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -35,11 +35,11 @@ public class ApplicationResponse<T> {
     }
 
     public static <T> ApplicationResponse<T> getSuccessResponse(T payload) {
-        return new ApplicationResponse<T>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getMessage(), payload);
+        return new ApplicationResponse<T>(ApplicationCode.SUCCESS.getCode(), ApplicationCode.SUCCESS.getMessage(), payload);
     }
 
     public static <T> ApplicationResponse<T> getFailureResponse(T payload) {
-        return new ApplicationResponse<T>(ResponseCode.FAILURE.getCode(), ResponseCode.FAILURE.getMessage(), payload);
+        return new ApplicationResponse<T>(ApplicationCode.FAILURE.getCode(), ApplicationCode.FAILURE.getMessage(), payload);
     }
 
     public static <T> ApplicationResponse<T> getSuccessResponse() {
@@ -47,6 +47,6 @@ public class ApplicationResponse<T> {
     }
 
     public static <T> ApplicationResponse<T> getSuccessResponse(String message, T payload) {
-        return new ApplicationResponse<T>(ResponseCode.SUCCESS.getCode(), message, payload);
+        return new ApplicationResponse<T>(ApplicationCode.SUCCESS.getCode(), message, payload);
     }
 }
