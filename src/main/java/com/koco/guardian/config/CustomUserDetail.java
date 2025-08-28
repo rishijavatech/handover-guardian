@@ -11,14 +11,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 public class CustomUserDetail implements UserDetails {
     private UserAuth authUser;
-    private List<Authority> authorities;
+    private Set<Authority> authorities;
 
-    public CustomUserDetail(UserAuth user, List<Authority> authorities) {
+    public CustomUserDetail(UserAuth user, Set<Authority> authorities) {
         this.authUser = user;
         this.authorities = authorities;
     }
@@ -28,7 +29,7 @@ public class CustomUserDetail implements UserDetails {
 
         List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(authorities.size());
         for (Authority auth : authorities) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(auth.getAuthority().name()));
+            grantedAuthorities.add(new SimpleGrantedAuthority(auth.getName()));
         }
         return grantedAuthorities;
     }
@@ -43,5 +44,15 @@ public class CustomUserDetail implements UserDetails {
         return authUser.getEmail();
     }
 
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return authUser.isActive();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return !authUser.isDeleted();
+    }
 
 }

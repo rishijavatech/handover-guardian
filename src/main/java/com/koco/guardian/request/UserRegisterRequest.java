@@ -1,7 +1,6 @@
 package com.koco.guardian.request;
 
-import com.koco.guardian.enums.UserRole;
-import com.koco.guardian.enums.UserType;
+import com.koco.guardian.entity.UserRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,10 +20,10 @@ public class UserRegisterRequest {
     private String password;
 
     @NotNull
-    private UserRole userRole;
+    private String userRole;
 
     @NotNull
-    private UserType userType;
+    private String userType;
 
     private String userId;
 

@@ -1,10 +1,12 @@
 package com.koco.guardian.service;
 
 import com.koco.guardian.entity.UserAuth;
+import com.koco.guardian.entity.UserRole;
 import com.koco.guardian.enums.ApplicationCode;
 import com.koco.guardian.exception.KocopeException;
 import com.koco.guardian.feignclient.PatronClient;
 import com.koco.guardian.repository.UserAuthRepository;
+import com.koco.guardian.repository.UserRoleRepository;
 import com.koco.guardian.request.UserLoginRequest;
 import com.koco.guardian.request.UserRegisterRequest;
 import com.koco.guardian.response.UserAuthResponse;
@@ -12,6 +14,7 @@ import com.koco.guardian.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +34,7 @@ public class UserAuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final PatronClient patronClient;
+    private final UserRoleRepository userRoleRepository;
 
     @Transactional(rollbackFor = Throwable.class)
     public UserAuthResponse registerUser(UserRegisterRequest userRegisterRequest) throws KocopeException {
@@ -38,11 +42,16 @@ public class UserAuthService {
         UserAuth existingUser = userAuthRepository.findByEmail(email).orElse(null);
         if (existingUser != null) {
             log.error("User already exists with email: {}", email);
-            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, ApplicationCode.USER_ALREADY_REGISTERED_IN_SYSTEM);
+            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    ApplicationCode.USER_ALREADY_REGISTERED_IN_SYSTEM);
         }
+
+        UserRole userRole = userRoleRepository.findByName(userRegisterRequest.getUserRole()).orElseThrow(
+                () -> new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "No user role exists with role: " + userRegisterRequest.getUserRole()));
         UserAuth userAuth = new UserAuth();
         userAuth.setEmail(email);
-        userAuth.setRole(userRegisterRequest.getUserRole());
+        userAuth.setRole(userRole);
         userAuth.setPassword(passwordEncoder.encode(userRegisterRequest.getPassword()));
 
         //TODO need to finalise the logic for user id creation

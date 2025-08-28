@@ -1,12 +1,11 @@
 package com.koco.guardian.entity;
 
-import com.koco.guardian.enums.UserRole;
-import com.koco.guardian.enums.UserType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,11 +22,27 @@ public class UserAuth {
     private String userId;
     private String email;
     private String password;
-    @Enumerated(EnumType.STRING)
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
     private UserRole role;
-//    @Transient
-//    @ToString.Exclude
-//    private List<String> authorities;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "type_id")
+    private UserType type;
+
     @CreationTimestamp
     private LocalDateTime createdOn;
+
+    @UpdateTimestamp
+    private LocalDateTime modifiedOn;
+
+    private String createdBy;
+
+    private String modifiedBy;
+
+    private boolean isActive = true;
+
+    private boolean isDeleted = false;
+
 }

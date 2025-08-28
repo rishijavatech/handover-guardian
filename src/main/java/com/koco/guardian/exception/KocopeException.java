@@ -19,4 +19,11 @@ public class KocopeException extends Exception {
         this.errorMessage = applicationCode.getMessage();
         this.code = applicationCode.getCode();
     }
+
+    public KocopeException(HttpStatus httpStatus, String errorMessage) {
+        super(errorMessage);
+        this.httpStatus = httpStatus;
+        this.errorMessage = errorMessage;
+        this.code = null;
+    }
 }

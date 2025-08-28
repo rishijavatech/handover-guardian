@@ -1,5 +1,6 @@
 package com.koco.guardian.util;
 
+import com.koco.guardian.config.CustomUserDetail;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,9 +24,16 @@ public class JwtUtil {
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
     public String generateToken(UserDetails userDetails) {
+        CustomUserDetail customUserDetail = (CustomUserDetail) userDetails;
         Map<String, Object> claims = new HashMap<>();
         claims.put("authorities", userDetails.getAuthorities().stream()
                                              .map(GrantedAuthority::getAuthority).toList());
+        String userId = customUserDetail.getAuthUser().getUserId();
+        String role = customUserDetail.getAuthUser().getRole().getName();
+        String type = customUserDetail.getAuthUser().getType().getName();
+        claims.put("userId", userId);
+        claims.put("role", role);
+        claims.put("type", type);
         return Jwts.builder()
                    .setClaims(claims)
                    .setSubject(userDetails.getUsername())

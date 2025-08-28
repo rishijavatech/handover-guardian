@@ -1,10 +1,10 @@
 package com.koco.guardian.entity;
 
-import com.koco.guardian.enums.AuthorityName;
-import com.koco.guardian.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "authorities")
@@ -15,9 +15,5 @@ public class Authority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
-    @Enumerated(EnumType.STRING)
-    private AuthorityName authority;
-
+    private String name;
 }
