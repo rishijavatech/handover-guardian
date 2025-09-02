@@ -2,11 +2,12 @@ package com.koco.guardian.service;
 
 import com.koco.guardian.entity.UserAuth;
 import com.koco.guardian.entity.UserRole;
+import com.koco.guardian.entity.UserType;
 import com.koco.guardian.enums.ApplicationCode;
 import com.koco.guardian.exception.KocopeException;
-import com.koco.guardian.feignclient.PatronClient;
 import com.koco.guardian.repository.UserAuthRepository;
 import com.koco.guardian.repository.UserRoleRepository;
+import com.koco.guardian.repository.UserTypeRepository;
 import com.koco.guardian.request.UserLoginRequest;
 import com.koco.guardian.request.UserRegisterRequest;
 import com.koco.guardian.response.UserAuthResponse;
@@ -14,7 +15,6 @@ import com.koco.guardian.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +32,9 @@ public class UserAuthService {
     private final UserAuthRepository userAuthRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final PatronClient patronClient;
     private final UserRoleRepository userRoleRepository;
+    private final UserTypeRepository userTypeRepository;
 
-    @Transactional(rollbackFor = Throwable.class)
     public UserAuthResponse registerUser(UserRegisterRequest userRegisterRequest) throws KocopeException {
         String email = userRegisterRequest.getEmail();
         UserAuth existingUser = userAuthRepository.findByEmail(email).orElse(null);
@@ -45,13 +43,17 @@ public class UserAuthService {
             throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
                     ApplicationCode.USER_ALREADY_REGISTERED_IN_SYSTEM);
         }
-
         UserRole userRole = userRoleRepository.findByName(userRegisterRequest.getUserRole()).orElseThrow(
                 () -> new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
                         "No user role exists with role: " + userRegisterRequest.getUserRole()));
+        UserType userType = userTypeRepository.findByName(userRegisterRequest.getUserType()).orElseThrow(
+                () -> new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "No user type exists with type: " + userRegisterRequest.getUserType()));
+
         UserAuth userAuth = new UserAuth();
         userAuth.setEmail(email);
         userAuth.setRole(userRole);
+        userAuth.setType(userType);
         userAuth.setPassword(passwordEncoder.encode(userRegisterRequest.getPassword()));
 
         //TODO need to finalise the logic for user id creation
@@ -59,11 +61,11 @@ public class UserAuthService {
         userAuth.setUserId(userId);
         userAuthRepository.save(userAuth);
         log.info("Successfully registered user in auth service with userName: {}", email);
-        userRegisterRequest.setUserId(userId);
-        patronClient.createUser(userRegisterRequest);
+//        patronClient.createUser(userRegisterRequest);
         UserAuthResponse userAuthResponse = new UserAuthResponse();
-        userAuthResponse.setUserName(userRegisterRequest.getEmail());
-        userAuthResponse.setMessage("User registered successfully");
+        userAuthResponse.setEmail(userRegisterRequest.getEmail());
+        userAuthResponse.setUserId(userId);
+        userAuthResponse.setMessage("User registered successfully in auth service");
         return userAuthResponse;
     }
 
@@ -74,7 +76,27 @@ public class UserAuthService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(userDetails);
         log.info("Token generated successfully for user : {}", userLoginRequest.getEmail());
-        return new UserAuthResponse(userLoginRequest.getEmail(), token, "Token " +
-                "generated successfully");
+        UserAuthResponse userAuthResponse = new UserAuthResponse();
+        userAuthResponse.setAuthToken(token);
+        userAuthResponse.setEmail(userLoginRequest.getEmail());
+        userAuthResponse.setMessage("Token generated successfully");
+        return userAuthResponse;
+    }
+
+    public UserAuthResponse deleteUser(String userId) throws KocopeException {
+        UserAuth userAuth = userAuthRepository.findByUserId(userId).orElseThrow(() -> {
+            log.error("User not found with userId: {}", userId);
+            return new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, ApplicationCode.USER_NOT_FOUND_IN_SYSTEM);
+        });
+        boolean existingStatus = userAuth.isDeleted();
+        if (existingStatus) {
+            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, ApplicationCode.USER_ALREADY_DELETED);
+        }
+        userAuth.setDeleted(true);
+        userAuthRepository.save(userAuth);
+        UserAuthResponse userAuthResponse = new UserAuthResponse();
+        userAuthResponse.setUserId(userId);
+        userAuthResponse.setMessage("User deleted successfully");
+        return userAuthResponse;
     }
 }
