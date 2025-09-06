@@ -48,6 +48,11 @@ ALTER TABLE user_auth
 ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT false;
 
+--changeset vaibhav:initialschema:5;
+alter table user_auth rename column created_on to created_at;
+alter table user_auth add column updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+alter table user_auth rename column modified_by to updated_by;
+
 
 
 
