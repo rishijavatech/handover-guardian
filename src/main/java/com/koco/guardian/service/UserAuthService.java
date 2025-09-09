@@ -1,5 +1,6 @@
 package com.koco.guardian.service;
 
+import com.koco.guardian.dto.LoggedInUser;
 import com.koco.guardian.entity.UserAuth;
 import com.koco.guardian.entity.UserRole;
 import com.koco.guardian.entity.UserType;
@@ -10,6 +11,7 @@ import com.koco.guardian.repository.UserRoleRepository;
 import com.koco.guardian.repository.UserTypeRepository;
 import com.koco.guardian.request.UserLoginRequest;
 import com.koco.guardian.request.UserRegisterRequest;
+import com.koco.guardian.request.UserStatusRequest;
 import com.koco.guardian.response.UserAuthResponse;
 import com.koco.guardian.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,7 @@ public class UserAuthService {
     private final UserRoleRepository userRoleRepository;
     private final UserTypeRepository userTypeRepository;
 
-    public UserAuthResponse registerUser(UserRegisterRequest userRegisterRequest) throws KocopeException {
+    public UserAuthResponse registerUser(UserRegisterRequest userRegisterRequest, LoggedInUser loggedInUser) throws KocopeException {
         String email = userRegisterRequest.getEmail();
         UserAuth existingUser = userAuthRepository.findByEmail(email).orElse(null);
         if (existingUser != null) {
@@ -54,6 +56,8 @@ public class UserAuthService {
         userAuth.setEmail(email);
         userAuth.setRole(userRole);
         userAuth.setType(userType);
+        userAuth.setCreatedBy(loggedInUser.getUserId());
+        userAuth.setUpdatedBy(loggedInUser.getUserId());
         userAuth.setPassword(passwordEncoder.encode(userRegisterRequest.getPassword()));
 
         //TODO need to finalise the logic for user id creation
@@ -98,5 +102,18 @@ public class UserAuthService {
         userAuthResponse.setUserId(userId);
         userAuthResponse.setMessage("User deleted successfully");
         return userAuthResponse;
+    }
+
+    public UserAuthResponse changeStatus(UserStatusRequest userStatusRequest) {
+        UserAuth userAuth = userAuthRepository.findByUserId(userStatusRequest.getUserId()).orElse(null);
+        if(userAuth != null) {
+            userAuth.setActive(userStatusRequest.isActive());
+            userAuthRepository.save(userAuth);
+            UserAuthResponse userAuthResponse = new UserAuthResponse();
+            userAuthResponse.setUserId(userStatusRequest.getUserId());
+            userAuthResponse.setMessage("Status changed successfully");
+            return userAuthResponse;
+        }
+        return null;
     }
 }
