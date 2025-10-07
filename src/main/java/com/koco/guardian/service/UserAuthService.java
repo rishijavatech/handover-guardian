@@ -16,7 +16,6 @@ import com.koco.guardian.response.UserAuthResponse;
 import com.koco.guardian.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -60,15 +59,12 @@ public class UserAuthService {
         userAuth.setUpdatedBy(loggedInUser.getUserId());
         userAuth.setPassword(passwordEncoder.encode(userRegisterRequest.getPassword()));
 
-        //TODO need to finalise the logic for user id creation
-        String userId = RandomStringUtils.randomAlphanumeric(20);
-        userAuth.setUserId(userId);
+        userAuth.setUserId(userRegisterRequest.getUserId());
         userAuthRepository.save(userAuth);
         log.info("Successfully registered user in auth service with userName: {}", email);
-//        patronClient.createUser(userRegisterRequest);
         UserAuthResponse userAuthResponse = new UserAuthResponse();
         userAuthResponse.setEmail(userRegisterRequest.getEmail());
-        userAuthResponse.setUserId(userId);
+        userAuthResponse.setUserId(userAuth.getUserId());
         userAuthResponse.setMessage("User registered successfully in auth service");
         return userAuthResponse;
     }

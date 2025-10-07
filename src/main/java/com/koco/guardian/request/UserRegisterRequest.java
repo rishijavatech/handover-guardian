@@ -26,5 +26,8 @@ public class UserRegisterRequest {
     @NotNull
     private String userType;
 
+    @NotBlank
+    private String userId;
+
 
 }
