@@ -152,6 +152,6 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>guardian-service</finalName>
     </build>
-
 </project>
