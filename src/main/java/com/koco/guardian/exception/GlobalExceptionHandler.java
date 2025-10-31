@@ -1,20 +1,25 @@
 package com.koco.guardian.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.koco.guardian.enums.ApplicationCode;
 import com.koco.guardian.response.ApplicationResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
@@ -72,19 +77,44 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApplicationResponse<String>> handleMethodArgumentNotValidException(HttpServletRequest req,
+    public ResponseEntity<ApplicationResponse<Map<String, String>>> handleMethodArgumentNotValidException(HttpServletRequest req,
             MethodArgumentNotValidException ex) {
-        List<String> errorMessages = new ArrayList<>();
-        for (FieldError error : ex.getBindingResult()
-                                  .getFieldErrors()) {
-            errorMessages.add(error.getField() + ' ' + error.getDefaultMessage());
-        }
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors()
+          .forEach((error) -> errors.put(error.getField(), error.getDefaultMessage()));
+        ApplicationResponse<Map<String, String>> response =
+                new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(), "Bad " +
+                        "request", errors);
+        return ResponseEntity.badRequest().body(response);
+    }
 
-        String errorMessage = String.join(", ", errorMessages);
-        log.error(LOG_FORMAT, req.getMethod(), req.getRequestURL(), errorMessage);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApplicationResponse<String>> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+        String errorMessage = "Invalid request body";
+        // Check if it's an unknown property exception
+        if (ex.getCause() instanceof UnrecognizedPropertyException) {
+            UnrecognizedPropertyException upe = (UnrecognizedPropertyException) ex.getCause();
+            errorMessage = "Unknown property: " + upe.getPropertyName();
+        } else if (ex.getCause() instanceof InvalidFormatException) {
+            errorMessage = "Invalid data format";
+        } else if (ex.getCause() instanceof MismatchedInputException) {
+            errorMessage = "Missing or invalid required field";
+        }
         ApplicationResponse<String> response = new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(), errorMessage,
                 errorMessage);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                             .body(response);
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApplicationResponse<String>> handleConstraintViolation(
+            ConstraintViolationException ex) {
+        String errorMessage = ex.getConstraintViolations()
+                                .stream()
+                                .map(ConstraintViolation::getMessage)
+                                .collect(Collectors.joining(", "));
+        ApplicationResponse<String> response = new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(), errorMessage,
+                errorMessage);
+        return ResponseEntity.badRequest().body(response);
     }
 }

@@ -1,28 +1,38 @@
 package com.koco.guardian.service;
 
+import com.koco.guardian.constants.Constant;
 import com.koco.guardian.entity.Authority;
 import com.koco.guardian.entity.UserRole;
+import com.koco.guardian.exception.KocopeException;
 import com.koco.guardian.repository.AuthorityRepository;
 import com.koco.guardian.repository.UserRoleRepository;
 import com.koco.guardian.request.AuthorityCreateRequest;
 import com.koco.guardian.response.AuthorityResponse;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthorityService {
 
     private final AuthorityRepository authorityRepository;
     private final UserRoleRepository roleRepository;
+    public static final Pattern AUTHORITY_REGEX_PATTERN = Pattern.compile(Constant.AUTHORITY_NAME_REGEX);
 
-    public AuthorityResponse createAuthority(AuthorityCreateRequest request) {
+    public AuthorityResponse createAuthority(AuthorityCreateRequest request) throws KocopeException {
+        validateAuthorityNames(request.getNames());
         List<String> existingAuthorities = new ArrayList<>();
         List<String> createdAuthorities = new ArrayList<>();
         for (String authorityName : request.getNames()) {
@@ -39,6 +49,16 @@ public class AuthorityService {
                 + ". Authorities already existed: " + String.join(", ", existingAuthorities);
 
         return new AuthorityResponse(createdAuthorities, message);
+    }
+
+    private void validateAuthorityNames(@NotNull @NotEmpty List<String> names) throws KocopeException {
+        List<String> invalidAuthorityNames = names.stream().filter(authority -> !AUTHORITY_REGEX_PATTERN.matcher(authority).matches())
+                                 .toList();
+        if(!invalidAuthorityNames.isEmpty()) {
+            log.error("Invalid authority names: {}", invalidAuthorityNames);
+            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid authority names: " + invalidAuthorityNames);
+        }
+
     }
 
     public List<Authority> getAllAuthorities() {

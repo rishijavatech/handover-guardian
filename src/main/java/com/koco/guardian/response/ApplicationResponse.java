@@ -17,13 +17,13 @@ public class ApplicationResponse<T> {
     @JsonProperty("response_message")
     private String message;
 
-    @JsonProperty("payload")
-    private T payload;
+    @JsonProperty("result")
+    private T result;
 
-    public ApplicationResponse(int code, String message, T payload) {
+    public ApplicationResponse(int code, String message, T result) {
         this.code = code;
         this.message = message;
-        this.payload = payload;
+        this.result = result;
     }
 
     public ApplicationResponse(int code, String message) {
