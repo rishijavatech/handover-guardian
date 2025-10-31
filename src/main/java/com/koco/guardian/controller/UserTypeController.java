@@ -39,7 +39,7 @@ public class UserTypeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApplicationResponse<UserTypeResponse>> updateUserType(@PathVariable Long id,
-            @RequestBody UserTypeCreateRequest request) {
+            @RequestBody @Valid UserTypeCreateRequest request) {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(userTypeService.updateUserType(id, request)));
     }
 
