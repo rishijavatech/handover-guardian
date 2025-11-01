@@ -29,7 +29,7 @@ public class AuthorityService {
 
     private final AuthorityRepository authorityRepository;
     private final UserRoleRepository roleRepository;
-    public static final Pattern AUTHORITY_REGEX_PATTERN = Pattern.compile(Constant.AUTHORITY_NAME_REGEX);
+    public static final Pattern AUTHORITY_REGEX_PATTERN = Pattern.compile(Constant.GENERIC_NAME_REGEX);
 
     public AuthorityResponse createAuthority(AuthorityCreateRequest request) throws KocopeException {
         validateAuthorityNames(request.getNames());
@@ -52,13 +52,15 @@ public class AuthorityService {
     }
 
     private void validateAuthorityNames(@NotNull @NotEmpty List<String> names) throws KocopeException {
-        List<String> invalidAuthorityNames = names.stream().filter(authority -> !AUTHORITY_REGEX_PATTERN.matcher(authority).matches())
-                                 .toList();
-        if(!invalidAuthorityNames.isEmpty()) {
+        List<String> invalidAuthorityNames = names.stream()
+                                                  .filter(authority -> !AUTHORITY_REGEX_PATTERN.matcher(authority)
+                                                                                               .matches())
+                                                  .toList();
+        if (!invalidAuthorityNames.isEmpty()) {
             log.error("Invalid authority names: {}", invalidAuthorityNames);
-            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid authority names: " + invalidAuthorityNames);
+            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Invalid authority names: " + invalidAuthorityNames);
         }
-
     }
 
     public List<Authority> getAllAuthorities() {
