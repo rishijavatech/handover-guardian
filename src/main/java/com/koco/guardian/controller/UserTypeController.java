@@ -5,6 +5,7 @@ import com.koco.guardian.request.UserTypeCreateRequest;
 import com.koco.guardian.response.ApplicationResponse;
 import com.koco.guardian.response.UserTypeResponse;
 import com.koco.guardian.service.UserTypeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,8 @@ public class UserTypeController {
     private final UserTypeService userTypeService;
 
     @PostMapping
-    public ResponseEntity<ApplicationResponse<UserTypeResponse>> createUserType(@RequestBody UserTypeCreateRequest request) {
+    public ResponseEntity<ApplicationResponse<UserTypeResponse>> createUserType(
+            @RequestBody @Valid UserTypeCreateRequest request) {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(userTypeService.createUserType(request)));
     }
 
@@ -36,7 +38,8 @@ public class UserTypeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApplicationResponse<UserTypeResponse>> updateUserType(@PathVariable Long id, @RequestBody UserTypeCreateRequest request) {
+    public ResponseEntity<ApplicationResponse<UserTypeResponse>> updateUserType(@PathVariable Long id,
+            @RequestBody @Valid UserTypeCreateRequest request) {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(userTypeService.updateUserType(id, request)));
     }
 

@@ -5,6 +5,7 @@ import com.koco.guardian.request.RoleCreateRequest;
 import com.koco.guardian.response.ApplicationResponse;
 import com.koco.guardian.response.RoleResponse;
 import com.koco.guardian.service.UserRoleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class UserRoleController {
     private final UserRoleService roleService;
 
     @PostMapping
-    public ResponseEntity<ApplicationResponse<RoleResponse>> createRole(@RequestBody RoleCreateRequest request) {
+    public ResponseEntity<ApplicationResponse<RoleResponse>> createRole(@RequestBody @Valid RoleCreateRequest request) {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(roleService.createRole(request)));
     }
 
@@ -36,7 +37,8 @@ public class UserRoleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApplicationResponse<RoleResponse>> updateRole(@PathVariable Long id, @RequestBody RoleCreateRequest request) {
+    public ResponseEntity<ApplicationResponse<RoleResponse>> updateRole(@PathVariable Long id,
+            @RequestBody RoleCreateRequest request) {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(roleService.updateRole(id, request)));
     }
 

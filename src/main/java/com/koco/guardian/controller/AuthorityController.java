@@ -1,6 +1,7 @@
 package com.koco.guardian.controller;
 
 import com.koco.guardian.entity.Authority;
+import com.koco.guardian.exception.KocopeException;
 import com.koco.guardian.request.AuthorityCreateRequest;
 import com.koco.guardian.response.ApplicationResponse;
 import com.koco.guardian.response.AuthorityResponse;
@@ -20,7 +21,9 @@ public class AuthorityController {
     private final AuthorityService authorityService;
 
     @PostMapping
-    public ResponseEntity<ApplicationResponse<AuthorityResponse>> createAuthority(@RequestBody AuthorityCreateRequest request) {
+    public ResponseEntity<ApplicationResponse<AuthorityResponse>> createAuthority(
+            @RequestBody @Valid AuthorityCreateRequest request) throws
+            KocopeException {
         AuthorityResponse response = authorityService.createAuthority(request);
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(response));
     }
@@ -56,18 +59,21 @@ public class AuthorityController {
     @PostMapping("/assign/{role}/{authority}")
     public ResponseEntity<ApplicationResponse<AuthorityResponse>> assignAuthorityToRole(
             @PathVariable String role, @PathVariable String authority) {
-        return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(authorityService.assignAuthorityToRole(role, authority)));
+        return ResponseEntity.ok(
+                ApplicationResponse.getSuccessResponse(authorityService.assignAuthorityToRole(role, authority)));
     }
 
     @PostMapping("/assign-list/{role}")
     public ResponseEntity<ApplicationResponse<AuthorityResponse>> assignAuthoritiesToRole(
             @PathVariable String role, @RequestBody List<String> authorities) {
-        return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(authorityService.assignAuthoritiesToRole(role, authorities)));
+        return ResponseEntity.ok(
+                ApplicationResponse.getSuccessResponse(authorityService.assignAuthoritiesToRole(role, authorities)));
     }
 
     @DeleteMapping("/revoke/{role}/{authority}")
     public ResponseEntity<ApplicationResponse<AuthorityResponse>> revokeAuthorityFromRole(
             @PathVariable String role, @PathVariable String authority) {
-        return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(authorityService.revokeAuthorityFromRole(role, authority)));
+        return ResponseEntity.ok(
+                ApplicationResponse.getSuccessResponse(authorityService.revokeAuthorityFromRole(role, authority)));
     }
 }
