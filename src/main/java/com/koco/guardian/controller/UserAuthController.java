@@ -38,7 +38,7 @@ public class UserAuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApplicationResponse<UserAuthResponse>> loginUser(
-            @RequestBody @Valid UserLoginRequest userLoginRequest) {
+            @RequestBody @Valid UserLoginRequest userLoginRequest) throws KocopeException {
         log.info("Received request to login user with email: {}", userLoginRequest.getEmail());
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(userAuthService.loginUser(userLoginRequest)));
     }
