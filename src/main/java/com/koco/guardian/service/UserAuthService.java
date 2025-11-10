@@ -69,16 +69,22 @@ public class UserAuthService {
         return userAuthResponse;
     }
 
-    public UserAuthResponse loginUser(UserLoginRequest userLoginRequest) {
+    public UserAuthResponse loginUser(UserLoginRequest userLoginRequest) throws KocopeException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userLoginRequest.getEmail(),
                         userLoginRequest.getPassword()));
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserAuth userAuth = userAuthRepository.findByEmail(userLoginRequest.getEmail()).orElse(null);
+        if (userAuth == null) {
+            log.error("User doesn't exist in system: {}", userLoginRequest.getEmail());
+            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, ApplicationCode.USER_NOT_FOUND_IN_SYSTEM);
+        }
         String token = jwtUtil.generateToken(userDetails);
         log.info("Token generated successfully for user : {}", userLoginRequest.getEmail());
         UserAuthResponse userAuthResponse = new UserAuthResponse();
         userAuthResponse.setAuthToken(token);
         userAuthResponse.setEmail(userLoginRequest.getEmail());
+        userAuthResponse.setUserId(userAuth.getUserId());
         userAuthResponse.setMessage("Token generated successfully");
         return userAuthResponse;
     }

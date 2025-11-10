@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,32 +29,32 @@ public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Request: {} {} raised {}";
     private static final String ERROR = "Error: ";
 
-    @ExceptionHandler(InvalidFormatException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidFormat(InvalidFormatException ex) {
-        Class<?> targetType = ex.getTargetType();
-        if (targetType.isEnum()) {
-            Object invalidValue = ex.getValue();
-            Object[] enumValues = targetType.getEnumConstants();
-            String allowed = String.join(", ",
-                    List.of(enumValues).stream().map(Object::toString).toList());
-            String message = String.format(
-                    "Invalid value '%s'. Allowed values for %s: %s",
-                    invalidValue, targetType.getSimpleName(), allowed
-            );
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of(
-                            "error", "Invalid enum value",
-                            "message", message
-                    ));
-        }
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "error", " Invalid request format",
-                        "message", "Please try again"
-                ));
-    }
+//    @ExceptionHandler(InvalidFormatException.class)
+//    public ResponseEntity<Map<String, String>> handleInvalidFormat(InvalidFormatException ex) {
+//        Class<?> targetType = ex.getTargetType();
+//        if (targetType.isEnum()) {
+//            Object invalidValue = ex.getValue();
+//            Object[] enumValues = targetType.getEnumConstants();
+//            String allowed = String.join(", ",
+//                    List.of(enumValues).stream().map(Object::toString).toList());
+//            String message = String.format(
+//                    "Invalid value '%s'. Allowed values for %s: %s",
+//                    invalidValue, targetType.getSimpleName(), allowed
+//            );
+//            return ResponseEntity
+//                    .status(HttpStatus.BAD_REQUEST)
+//                    .body(Map.of(
+//                            "error", "Invalid enum value",
+//                            "message", message
+//                    ));
+//        }
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(Map.of(
+//                        "error", " Invalid request format",
+//                        "message", "Please try again"
+//                ));
+//    }
 
     @ExceptionHandler(KocopeException.class)
     public ResponseEntity<ApplicationResponse<String>> handleKocopeException(HttpServletRequest req,
@@ -88,21 +89,53 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApplicationResponse<Map<String, String>>> handleBadCredentialsException(HttpServletRequest req,
+            BadCredentialsException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error", "Invalid email or password. Please try again");
+        errors.put("message", ex.getMessage());
+        ApplicationResponse<Map<String, String>> response =
+                new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(), "Bad credentials", errors);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApplicationResponse<String>> handleHttpMessageNotReadable(
+    public ResponseEntity<ApplicationResponse<Map<String, String>>> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex) {
         String errorMessage = "Invalid request body";
         // Check if it's an unknown property exception
         if (ex.getCause() instanceof UnrecognizedPropertyException) {
             UnrecognizedPropertyException upe = (UnrecognizedPropertyException) ex.getCause();
             errorMessage = "Unknown property: " + upe.getPropertyName();
-        } else if (ex.getCause() instanceof InvalidFormatException) {
-            errorMessage = "Invalid data format";
+        } else if (ex.getCause() instanceof InvalidFormatException exception) {
+            Class<?> targetType = exception.getTargetType();
+            if (targetType.isEnum()) {
+                Object invalidValue = exception.getValue();
+                Object[] enumValues = targetType.getEnumConstants();
+                String allowed = String.join(", ",
+                        List.of(enumValues).stream().map(Object::toString).toList());
+                String message = String.format(
+                        "Invalid value '%s'. Allowed values for %s: %s",
+                        invalidValue, targetType.getSimpleName(), allowed
+                );
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(ApplicationResponse.getFailureResponse(Map.of(
+                                "error", "Invalid enum value",
+                                "message", message
+                        )));
+            } else {
+                errorMessage = "Invalid data format";
+            }
         } else if (ex.getCause() instanceof MismatchedInputException) {
             errorMessage = "Missing or invalid required field";
         }
-        ApplicationResponse<String> response = new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(), errorMessage,
-                errorMessage);
+        ApplicationResponse<Map<String, String>> response = new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(),
+                errorMessage,
+                Map.of(
+                        "error", "Invalid request. Please try again",
+                        "message", errorMessage));
         return ResponseEntity.badRequest().body(response);
     }
 
@@ -117,4 +150,5 @@ public class GlobalExceptionHandler {
                 errorMessage);
         return ResponseEntity.badRequest().body(response);
     }
+
 }
