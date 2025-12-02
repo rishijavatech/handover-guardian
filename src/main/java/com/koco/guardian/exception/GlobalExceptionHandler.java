@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -97,6 +98,16 @@ public class GlobalExceptionHandler {
         errors.put("message", ex.getMessage());
         ApplicationResponse<Map<String, String>> response =
                 new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(), "Bad credentials", errors);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApplicationResponse<Map<String, String>>> handleLockedException(HttpServletRequest req,
+            LockedException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error", "User is inactive. Please contact admin");
+        errors.put("message", ex.getMessage());
+        ApplicationResponse<Map<String, String>> response =
+                new ApplicationResponse<>(ApplicationCode.FAILURE.getCode(), "Failure", errors);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
