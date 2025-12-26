@@ -41,7 +41,8 @@ public class AuthorityController {
     }
 
     @GetMapping("/all/{role}")
-    public ResponseEntity<ApplicationResponse<AuthorityResponse>> getAllAuthorityForRole(@PathVariable String role) {
+    public ResponseEntity<ApplicationResponse<AuthorityResponse>> getAllAuthorityForRole(@PathVariable String role) throws
+            KocopeException {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(authorityService.getAllAuthorityForRole(role)));
     }
 
@@ -58,14 +59,14 @@ public class AuthorityController {
 
     @PostMapping("/assign/{role}/{authority}")
     public ResponseEntity<ApplicationResponse<AuthorityResponse>> assignAuthorityToRole(
-            @PathVariable String role, @PathVariable String authority) {
+            @PathVariable String role, @PathVariable String authority) throws KocopeException {
         return ResponseEntity.ok(
                 ApplicationResponse.getSuccessResponse(authorityService.assignAuthorityToRole(role, authority)));
     }
 
     @PostMapping("/assign-list/{role}")
     public ResponseEntity<ApplicationResponse<AuthorityResponse>> assignAuthoritiesToRole(
-            @PathVariable String role, @RequestBody List<String> authorities) {
+            @PathVariable String role, @RequestBody List<String> authorities) throws KocopeException {
         return ResponseEntity.ok(
                 ApplicationResponse.getSuccessResponse(authorityService.assignAuthoritiesToRole(role, authorities)));
     }

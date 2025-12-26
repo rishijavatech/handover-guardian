@@ -89,7 +89,7 @@ public class UserAuthServiceTest {
     }
 
     @Test
-    void loginUser_success() {
+    void loginUser_success() throws KocopeException {
         UserLoginRequest req = new UserLoginRequest();
         req.setEmail("test@koco.com");
         req.setPassword("password");

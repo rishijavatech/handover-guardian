@@ -20,7 +20,7 @@ public class UserRoleController {
     private final UserRoleService roleService;
 
     @PostMapping
-    public ResponseEntity<ApplicationResponse<RoleResponse>> createRole(@RequestBody @Valid RoleCreateRequest request) {
+    public ResponseEntity<ApplicationResponse<RoleResponse>> createRole( @Valid @RequestBody RoleCreateRequest request) {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(roleService.createRole(request)));
     }
 

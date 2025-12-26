@@ -37,7 +37,7 @@ public class UserAuthService {
     private final UserTypeRepository userTypeRepository;
 
     public UserAuthResponse registerUser(UserRegisterRequest userRegisterRequest, LoggedInUser loggedInUser) throws KocopeException {
-        String email = userRegisterRequest.getEmail();
+        String email = userRegisterRequest.getEmail().trim().toLowerCase();
         UserAuth existingUser = userAuthRepository.findByEmail(email).orElse(null);
         if (existingUser != null) {
             log.error("User already exists with email: {}", email);
@@ -63,7 +63,7 @@ public class UserAuthService {
         userAuthRepository.save(userAuth);
         log.info("Successfully registered user in auth service with userName: {}", email);
         UserAuthResponse userAuthResponse = new UserAuthResponse();
-        userAuthResponse.setEmail(userRegisterRequest.getEmail());
+        userAuthResponse.setEmail(userRegisterRequest.getEmail().trim().toLowerCase());
         userAuthResponse.setUserId(userAuth.getUserId());
         userAuthResponse.setMessage("User registered successfully in auth service");
         return userAuthResponse;
@@ -71,10 +71,10 @@ public class UserAuthService {
 
     public UserAuthResponse loginUser(UserLoginRequest userLoginRequest) throws KocopeException {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userLoginRequest.getEmail(),
+                new UsernamePasswordAuthenticationToken(userLoginRequest.getEmail().trim().toLowerCase(),
                         userLoginRequest.getPassword()));
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        UserAuth userAuth = userAuthRepository.findByEmail(userLoginRequest.getEmail()).orElse(null);
+        UserAuth userAuth = userAuthRepository.findByEmail(userLoginRequest.getEmail().trim().toLowerCase()).orElse(null);
         if (userAuth == null) {
             log.error("User doesn't exist in system: {}", userLoginRequest.getEmail());
             throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY, ApplicationCode.USER_NOT_FOUND_IN_SYSTEM);
@@ -83,7 +83,7 @@ public class UserAuthService {
         log.info("Token generated successfully for user : {}", userLoginRequest.getEmail());
         UserAuthResponse userAuthResponse = new UserAuthResponse();
         userAuthResponse.setAuthToken(token);
-        userAuthResponse.setEmail(userLoginRequest.getEmail());
+        userAuthResponse.setEmail(userLoginRequest.getEmail().trim().toLowerCase());
         userAuthResponse.setUserId(userAuth.getUserId());
         userAuthResponse.setMessage("Token generated successfully");
         return userAuthResponse;

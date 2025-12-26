@@ -9,7 +9,7 @@ import static com.koco.guardian.constants.Constant.GENERIC_NAME_REGEX;
 @Data
 public class UserTypeCreateRequest {
 
-    @NotBlank
-    @Pattern(regexp = GENERIC_NAME_REGEX, message = "Invalid type name")
+    @NotBlank(message = "User type name cannot be empty")
+    @Pattern(regexp = GENERIC_NAME_REGEX, message = "Invalid type name. Special characters and numbers are not allowed")
     private String name;
 }

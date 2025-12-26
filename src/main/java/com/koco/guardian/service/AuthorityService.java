@@ -58,7 +58,7 @@ public class AuthorityService {
                                                   .toList();
         if (!invalidAuthorityNames.isEmpty()) {
             log.error("Invalid authority names: {}", invalidAuthorityNames);
-            throw new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new KocopeException(HttpStatus.BAD_REQUEST,
                     "Invalid authority names: " + invalidAuthorityNames);
         }
     }
@@ -86,7 +86,14 @@ public class AuthorityService {
         }).orElse(new AuthorityResponse(null, "Authority not found"));
     }
 
-    public AuthorityResponse assignAuthorityToRole(String role, String authority) {
+    public AuthorityResponse assignAuthorityToRole(String role, String authority)throws KocopeException {
+        if (!role.matches(Constant.GENERIC_NAME_REGEX)) {
+            throw new KocopeException(HttpStatus.BAD_REQUEST, "Invalid role format. Role value in lowercase (case-sensitive test) " + role);
+        }
+        if (!authority.matches(Constant.GENERIC_NAME_REGEX)) {
+            throw new KocopeException(HttpStatus.BAD_REQUEST, "Invalid authority format. Authority value in lowercase" +
+                    " (case-sensitive test) " + authority);
+        }
         Optional<UserRole> roleOpt = roleRepository.findByName(role);
         Optional<Authority> authOpt = authorityRepository.findByName(authority);
 
@@ -100,15 +107,27 @@ public class AuthorityService {
             roleRepository.save(userRole);
             return new AuthorityResponse(Collections.singletonList(authority), "Authority assigned successfully");
         }
-        return new AuthorityResponse(null, "Role or Authority not found");
-    }
 
-    public AuthorityResponse assignAuthoritiesToRole(String roleName, List<String> authorityNames) {
-        Optional<UserRole> roleOpt = roleRepository.findByName(roleName);
         if (roleOpt.isEmpty()) {
-            return new AuthorityResponse(null, "Role not found");
+            throw new KocopeException(HttpStatus.NOT_FOUND, "Role not found: " + role);
         }
 
+        if (authOpt.isEmpty()) {
+            throw new KocopeException(HttpStatus.NOT_FOUND, "Authority not found: " + authority);
+        }
+        throw new KocopeException(HttpStatus.NOT_FOUND, "Role or Authority not found");
+    }
+
+    public AuthorityResponse assignAuthoritiesToRole(String roleName, List<String> authorityNames) throws
+            KocopeException {
+        Optional<UserRole> roleOpt = roleRepository.findByName(roleName);
+        if (roleOpt.isEmpty()) {
+            throw new KocopeException(HttpStatus.NOT_FOUND, "Role not found");
+        }
+
+        if (authorityNames == null || authorityNames.isEmpty()) {
+            throw new KocopeException(HttpStatus.BAD_REQUEST, "Authorities cannot be empty");
+        }
         UserRole role = roleOpt.get();
         List<String> invalidAuthorities = new ArrayList<>();
         List<Authority> validAuthorities = new ArrayList<>();
@@ -123,7 +142,7 @@ public class AuthorityService {
         }
 
         if (validAuthorities.isEmpty()) {
-            return new AuthorityResponse(null, "No valid authorities found");
+            throw new KocopeException(HttpStatus.BAD_REQUEST, "No valid authorities found");
         }
 
         role.getAuthorities().addAll(validAuthorities);
@@ -153,11 +172,11 @@ public class AuthorityService {
         return new AuthorityResponse(null, "Role or Authority not found");
     }
 
-    public AuthorityResponse getAllAuthorityForRole(String role) {
+    public AuthorityResponse getAllAuthorityForRole(String role) throws KocopeException {
        return roleRepository.findByName(role).map(userRole -> {
             return new AuthorityResponse(userRole.getAuthorities().stream().map(Authority::getName).toList(),
                     "Authorities " +
                     "fetched successfully");
-        }).orElse( new AuthorityResponse(null, "Role not found"));
+        }).orElseThrow(() -> new KocopeException(HttpStatus.NOT_FOUND, "Role not found: " + role));
     }
 }
