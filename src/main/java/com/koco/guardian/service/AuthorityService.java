@@ -88,11 +88,11 @@ public class AuthorityService {
 
     public AuthorityResponse assignAuthorityToRole(String role, String authority)throws KocopeException {
         if (!role.matches(Constant.GENERIC_NAME_REGEX)) {
-            throw new KocopeException(HttpStatus.BAD_REQUEST, "Invalid role format. Role value in lowercase (case-sensitive test) " + role);
+            throw new KocopeException(HttpStatus.BAD_REQUEST, "Invalid role format. The role name must be UPPERCASE and follow the required naming pattern:" + role);
         }
         if (!authority.matches(Constant.GENERIC_NAME_REGEX)) {
-            throw new KocopeException(HttpStatus.BAD_REQUEST, "Invalid authority format. Authority value in lowercase" +
-                    " (case-sensitive test) " + authority);
+            throw new KocopeException(HttpStatus.BAD_REQUEST, "Invalid role format. The role name must be UPPERCASE " +
+                    "and follow the required naming pattern:" + authority);
         }
         Optional<UserRole> roleOpt = roleRepository.findByName(role);
         Optional<Authority> authOpt = authorityRepository.findByName(authority);
@@ -111,11 +111,7 @@ public class AuthorityService {
         if (roleOpt.isEmpty()) {
             throw new KocopeException(HttpStatus.NOT_FOUND, "Role not found: " + role);
         }
-
-        if (authOpt.isEmpty()) {
-            throw new KocopeException(HttpStatus.NOT_FOUND, "Authority not found: " + authority);
-        }
-        throw new KocopeException(HttpStatus.NOT_FOUND, "Role or Authority not found");
+        throw new KocopeException(HttpStatus.NOT_FOUND, "Authority not found: " + authority);
     }
 
     public AuthorityResponse assignAuthoritiesToRole(String roleName, List<String> authorityNames) throws
