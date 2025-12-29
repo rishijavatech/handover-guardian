@@ -21,7 +21,7 @@ public class UserTypeController {
 
     @PostMapping
     public ResponseEntity<ApplicationResponse<UserTypeResponse>> createUserType(
-            @RequestBody @Valid UserTypeCreateRequest request) {
+            @Valid @RequestBody UserTypeCreateRequest request) {
         return ResponseEntity.ok(ApplicationResponse.getSuccessResponse(userTypeService.createUserType(request)));
     }
 

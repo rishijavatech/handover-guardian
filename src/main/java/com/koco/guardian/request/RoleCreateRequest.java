@@ -9,7 +9,7 @@ import static com.koco.guardian.constants.Constant.GENERIC_NAME_REGEX;
 @Data
 public class RoleCreateRequest {
 
-    @NotBlank
-    @Pattern(regexp = GENERIC_NAME_REGEX, message = "Invalid role mame")
+    @NotBlank(message = "Role cannot be empty or whitespace")
+    @Pattern(regexp = GENERIC_NAME_REGEX, message = "Invalid role format. Only uppercase letters and underscores allowed")
     private String role;
 }

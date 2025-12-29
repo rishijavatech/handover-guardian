@@ -132,7 +132,7 @@ public class AuthorityServiceTest {
     }
 
     @Test
-    void testAssignAuthorityToRole_Success() {
+    void testAssignAuthorityToRole_Success() throws KocopeException {
         UserRole role = new UserRole();
         role.setName("Admin");
         role.setAuthorities(new HashSet<>());
@@ -150,7 +150,7 @@ public class AuthorityServiceTest {
     }
 
     @Test
-    void testAssignAuthorityToRole_AlreadyAssigned() {
+    void testAssignAuthorityToRole_AlreadyAssigned() throws KocopeException {
         UserRole role = new UserRole();
         role.setName("Admin");
         Authority authority = new Authority();
@@ -169,7 +169,7 @@ public class AuthorityServiceTest {
     }
 
     @Test
-    void testAssignAuthorityToRole_NotFound() {
+    void testAssignAuthorityToRole_NotFound() throws KocopeException {
         when(roleRepository.findByName("Admin")).thenReturn(Optional.empty());
         when(authorityRepository.findByName("AUTH_READ")).thenReturn(Optional.empty());
 
@@ -208,7 +208,7 @@ public class AuthorityServiceTest {
         assertNull(response.getAuthorities());
     }
     @Test
-    void testGetAllAuthorityForRole_Success() {
+    void testGetAllAuthorityForRole_Success() throws KocopeException {
         UserRole role = new UserRole();
         role.setName("Admin");
         Authority authority = new Authority();
@@ -224,7 +224,7 @@ public class AuthorityServiceTest {
     }
 
     @Test
-    void testGetAllAuthorityForRole_NotFound() {
+    void testGetAllAuthorityForRole_NotFound() throws KocopeException {
         when(roleRepository.findByName("NoRole")).thenReturn(Optional.empty());
 
         AuthorityResponse response = authorityService.getAllAuthorityForRole("NoRole");
@@ -261,7 +261,7 @@ public class AuthorityServiceTest {
         verifyNoMoreInteractions(authorityRepository);
     }
     @Test
-    void testAssignAuthoritiesToRole_AllInvalidAuthorities() {
+    void testAssignAuthoritiesToRole_AllInvalidAuthorities() throws KocopeException {
         UserRole role = new UserRole();
         when(roleRepository.findByName("Admin")).thenReturn(Optional.of(role));
         when(authorityRepository.findByName(anyString())).thenReturn(Optional.empty());
@@ -272,7 +272,7 @@ public class AuthorityServiceTest {
     }
 
     @Test
-    void testAssignAuthoritiesToRole_MixedValidInvalid() {
+    void testAssignAuthoritiesToRole_MixedValidInvalid() throws KocopeException {
         UserRole role = new UserRole();
         role.setAuthorities(new HashSet<>());  // Initialize the authorities set here
 
@@ -307,7 +307,7 @@ public class AuthorityServiceTest {
     }
 
     @Test
-    void testGetAllAuthorityForRole_EmptyAuthorities() {
+    void testGetAllAuthorityForRole_EmptyAuthorities() throws KocopeException {
         UserRole role = new UserRole();
         role.setAuthorities(new HashSet<>());
         when(roleRepository.findByName("Admin")).thenReturn(Optional.of(role));
