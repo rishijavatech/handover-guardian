@@ -2,6 +2,7 @@ package com.koco.guardian.controller;
 
 import com.koco.guardian.dto.LoggedInUser;
 import com.koco.guardian.exception.KocopeException;
+import com.koco.guardian.request.ResetPasswordRequest;
 import com.koco.guardian.request.UserLoginRequest;
 import com.koco.guardian.request.UserRegisterRequest;
 import com.koco.guardian.request.UserStatusRequest;
@@ -61,6 +62,14 @@ public class UserAuthController {
         return ResponseEntity.ok(
                 ApplicationResponse.getSuccessResponse(userAuthService.changeStatus(userStatusRequest)));
 
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApplicationResponse<UserAuthResponse>> resetPassword(
+            @RequestBody @Valid ResetPasswordRequest resetPasswordRequest) throws KocopeException {
+        log.info("Received request to reset password for username: {}", resetPasswordRequest.getUsername());
+        return ResponseEntity.ok(
+                ApplicationResponse.getSuccessResponse(userAuthService.resetPassword(resetPasswordRequest)));
     }
 
 }
