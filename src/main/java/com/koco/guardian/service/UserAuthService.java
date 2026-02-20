@@ -13,6 +13,7 @@ import com.koco.guardian.request.UserLoginRequest;
 import com.koco.guardian.request.UserRegisterRequest;
 import com.koco.guardian.request.ResetPasswordRequest;
 import com.koco.guardian.request.UserStatusRequest;
+import com.koco.guardian.response.ResetPasswordResponse;
 import com.koco.guardian.response.UserAuthResponse;
 import com.koco.guardian.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -120,7 +121,7 @@ public class UserAuthService {
         return null;
     }
 
-    public UserAuthResponse resetPassword(ResetPasswordRequest resetPasswordRequest) throws KocopeException {
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest resetPasswordRequest) throws KocopeException {
         String email = resetPasswordRequest.getEmail().trim().toLowerCase();
         String username = resetPasswordRequest.getUsername().trim();
         UserAuth userAuth = userAuthRepository
@@ -135,10 +136,10 @@ public class UserAuthService {
         userAuth.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         userAuthRepository.save(userAuth);
 
-        UserAuthResponse userAuthResponse = new UserAuthResponse();
-        userAuthResponse.setUserId(userAuth.getUserId());
-        userAuthResponse.setEmail(userAuth.getEmail());
-        userAuthResponse.setMessage("The password has been reset successfully!");
-        return userAuthResponse;
+        ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
+        //userAuthResponse.setUserId(userAuth.getUserId());
+        //userAuthResponse.setEmail(userAuth.getEmail());
+        resetPasswordResponse.setMessage("The password has been reset successfully!");
+        return resetPasswordResponse;
     }
 }
