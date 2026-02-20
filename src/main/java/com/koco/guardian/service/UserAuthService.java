@@ -11,6 +11,7 @@ import com.koco.guardian.repository.UserRoleRepository;
 import com.koco.guardian.repository.UserTypeRepository;
 import com.koco.guardian.request.UserLoginRequest;
 import com.koco.guardian.request.UserRegisterRequest;
+import com.koco.guardian.request.ResetPasswordRequest;
 import com.koco.guardian.request.UserStatusRequest;
 import com.koco.guardian.response.UserAuthResponse;
 import com.koco.guardian.util.JwtUtil;
@@ -117,5 +118,27 @@ public class UserAuthService {
             return userAuthResponse;
         }
         return null;
+    }
+
+    public UserAuthResponse resetPassword(ResetPasswordRequest resetPasswordRequest) throws KocopeException {
+        String email = resetPasswordRequest.getEmail().trim().toLowerCase();
+        String username = resetPasswordRequest.getUsername().trim();
+        UserAuth userAuth = userAuthRepository
+                .findByUserIdAndEmailAndIsDeletedFalse(username, email)
+                .orElseThrow(() -> new KocopeException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        ApplicationCode.USER_NOT_FOUND_IN_SYSTEM));
+
+        if (!passwordEncoder.matches(resetPasswordRequest.getOldPassword(), userAuth.getPassword())) {
+            throw new KocopeException(HttpStatus.UNAUTHORIZED, "Invalid username/email or old password");
+        }
+
+        userAuth.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+        userAuthRepository.save(userAuth);
+
+        UserAuthResponse userAuthResponse = new UserAuthResponse();
+        userAuthResponse.setUserId(userAuth.getUserId());
+        userAuthResponse.setEmail(userAuth.getEmail());
+        userAuthResponse.setMessage("The password has been reset successfully!");
+        return userAuthResponse;
     }
 }
