@@ -83,7 +83,7 @@ public class UserAuthService {
         String token = jwtUtil.generateToken(userDetails);
         log.info("Token generated successfully for user : {}", userLoginRequest.getEmail());
         UserAuthResponse userAuthResponse = new UserAuthResponse();
-        //userAuthResponse.setAuthToken(token);
+        userAuthResponse.setAuthToken(token);
         userAuthResponse.setEmail(userLoginRequest.getEmail().trim().toLowerCase());
         userAuthResponse.setUserId(userAuth.getUserId());
         userAuthResponse.setMessage("Token generated successfully");
