@@ -1,0 +1,43 @@
+package com.koco.guardian.config;
+
+import com.koco.guardian.service.CustomUserDetailService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableMethodSecurity()
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final CustomUserDetailService customUserDetailService;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http.csrf(AbstractHttpConfigurer::disable)
+                   .authorizeHttpRequests(auth -> auth.requestMatchers("/guardian/api/v1/users/login").permitAll()
+                                                      .anyRequest().permitAll())
+                   .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {return new BCryptPasswordEncoder();}
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authManagerBuilder
+                .userDetailsService(customUserDetailService)
+                .passwordEncoder(passwordEncoder());
+        return authManagerBuilder.build();
+    }
+}
