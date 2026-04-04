@@ -5,6 +5,7 @@ import com.koco.guardian.request.UserTypeCreateRequest;
 import com.koco.guardian.response.ApplicationResponse;
 import com.koco.guardian.response.UserTypeResponse;
 import com.koco.guardian.service.UserTypeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@Tag(name = "User Type")
 @RequiredArgsConstructor
 @RequestMapping("/guardian/api/v1/user-type")
 public class UserTypeController {

@@ -6,6 +6,7 @@ import com.koco.guardian.request.AuthorityCreateRequest;
 import com.koco.guardian.response.ApplicationResponse;
 import com.koco.guardian.response.AuthorityResponse;
 import com.koco.guardian.service.AuthorityService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@Tag(name = "Authority")
 @RequiredArgsConstructor
 @RequestMapping("/guardian/api/v1/authority")
 public class AuthorityController {

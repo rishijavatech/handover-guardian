@@ -5,6 +5,7 @@ import com.koco.guardian.request.RoleCreateRequest;
 import com.koco.guardian.response.ApplicationResponse;
 import com.koco.guardian.response.RoleResponse;
 import com.koco.guardian.service.UserRoleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@Tag(name = "User Role")
 @RequiredArgsConstructor
 @RequestMapping("/guardian/api/v1/role")
 public class UserRoleController {

@@ -9,6 +9,7 @@ import com.koco.guardian.response.ApplicationResponse;
 import com.koco.guardian.response.UserAuthResponse;
 import com.koco.guardian.service.CommonService;
 import com.koco.guardian.service.UserAuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Tag(name = "User Auth")
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/guardian/api/v1/users")
