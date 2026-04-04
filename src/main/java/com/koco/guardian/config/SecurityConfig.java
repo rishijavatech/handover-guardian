@@ -25,9 +25,9 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
-            "/patron/api/v1/swagger-ui/**",
-            "/patron/api/v1/swagger-ui.html",
-            "/patron/api/v1/v3/api-docs/**"
+            "/guardian/api/v1/swagger-ui/**",
+            "/guardian/api/v1/swagger-ui.html",
+            "/guardian/api/v1/v3/api-docs/**"
     };
 
     private final CustomUserDetailService customUserDetailService;
